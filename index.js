@@ -251,7 +251,6 @@ function push (state, path, item) {
 }
 
 function chain (original, state) {
-    //bind is crazy slow.  Using a closure is about 10x faster
     return {
         original: original,
         set: function (path, val) {
@@ -274,6 +273,12 @@ function chain (original, state) {
         },
         push: function (path, item) {
             return push.call(original, state, path, item);
+        },
+        splice: function () {
+            return splice.apply(original, [state].concat(arguments));
+        },
+        sort: function (fn) {
+            return sort.call(original, state, fn);
         },
         end: function () {
             return state;
