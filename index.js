@@ -275,10 +275,10 @@ function chain (original, state) {
             return push.call(original, state, path, item);
         },
         splice: function () {
-            return splice.apply(original, [state].concat(arguments));
+            return splice.apply(original, [state].concat(Array.prototype.slice.call(arguments)));
         },
-        sort: function (fn) {
-            return sort.call(original, state, fn);
+        sort: function (path, fn) {
+            return sort.call(original, state, path, fn);
         },
         end: function () {
             return state;
