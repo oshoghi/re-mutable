@@ -250,23 +250,34 @@ function push (state, path, item) {
     });
 }
 
-function end (state) {
-    return state;
-}
-
 function chain (original, state) {
+    //bind is crazy slow.  Using a closure is about 10x faster
     return {
         original: original,
-        set: set.bind(original, state),
-        unset: unset.bind(original, state),
-        increment: increment.bind(original, state),
-        decrement: decrement.bind(original, state),
-        concat: concat.bind(original, state),
-        prepend: prepend.bind(original, state),
-        splice: splice.bind(original, state),
-        sort: sort.bind(original, state),
-        push: push.bind(original, state),
-        end: end.bind(null, state)
+        set: function (path, val) {
+            return set.call(original, state, path, val);
+        },
+        unset: function (path) {
+            return unset.call(original, state, path);
+        },
+        increment: function (path, by) {
+            return increment.call(original, state, path, by);
+        },
+        decrement: function (path, by) {
+            return decrement.call(original, state, path, by);
+        },
+        concat: function (path, items) {
+            return concat.call(original, state, path, items);
+        },
+        prepend: function (path, items) {
+            return prepend.call(original, state, path, items);
+        },
+        push: function (path, item) {
+            return push.call(original, state, path, item);
+        },
+        end: function () {
+            return state;
+        }
     };
 }
 
