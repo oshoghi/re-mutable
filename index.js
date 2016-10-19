@@ -245,7 +245,7 @@ function splice (state, path) {
  */
 function push (state, path, item) {
     return modify.call(this, state, path, function (tip, lastKey) {
-        tip[lastKey] = clone(tip[lastKey]);
+        tip[lastKey] = clone(tip[lastKey]) || [];
         tip[lastKey].push(item);
     });
 }
