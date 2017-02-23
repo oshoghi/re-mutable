@@ -4,6 +4,14 @@ jest.dontMock("../index.js");
 
 describe("Re-mutable", function () {
     var update = require("../index.js");
+    var data = {
+        list: [
+            { id: 1, name: "henry" },
+            { id: 2, name: "omar" },
+            { id: 3, name: "lisa" },
+        ]
+    };
+
 
     it("doesnt mutate when pushing", function () {
         var state = { a: [1, 2, 3] };
@@ -93,5 +101,52 @@ describe("Re-mutable", function () {
         next = update.decrement(state, ["a", 0], 5);
         expect(next).toEqual({ a: [-4, 2, 3] });
         expect(state).toEqual({ a: [1, 2, 3] });
+    });
+
+    it("sets a value using a predicate", function () {
+        var next = update.set(data, ["list", { id: 2 }, "name"], "george");
+
+        expect(next).toEqual({
+            list: [
+                { id: 1, name: "henry" },
+                { id: 2, name: "george" },
+                { id: 3, name: "lisa" },
+            ]
+        });
+    });
+
+    it("increments using a predicate", function () {
+        var next = update.increment(data, ["list", { id: 2 }, "id"]);
+
+        expect(next).toEqual({
+            list: [
+                { id: 1, name: "henry" },
+                { id: 3, name: "omar" },
+                { id: 3, name: "lisa" },
+            ]
+        });
+    });
+
+    it("unsets with predicate", function () {
+        var next = update.unset(data, ["list", { id: 2 }]);
+
+        expect(next).toEqual({
+            list: [
+                { id: 1, name: "henry" },
+                { id: 3, name: "lisa" },
+            ]
+        });
+    });
+
+    it("throws exception when trying to set a predicated that doesnt match", function () {
+        var caught = false;
+
+        try {
+            var next = update.unset(data, ["list", { id: 5 }]);
+        } catch (e) {
+            caught = true;
+        }
+
+        expect(caught).toBe(true);
     });
 });

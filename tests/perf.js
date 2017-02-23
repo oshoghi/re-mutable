@@ -2,6 +2,7 @@ window.__DEV__ = true;
 
 jest.dontMock("../index.js");
 
+/*
 describe("compare perf", function () {
     var update = require("../index.js"),
         helper = require("immutability-helper"),
@@ -66,4 +67,4 @@ describe("compare perf", function () {
                 istate.set("a", "a").set("c", 4);
             }));
     });
-});
+});*/

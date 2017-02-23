@@ -17,10 +17,27 @@ var clone = function (obj) {
     return obj;
 }
 
+function findIndexByPredicate (arr, predicate) {
+    for (var key in predicate) {
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i][key] === predicate[key]) {
+                return i;
+            }
+        }
+
+        //only try the first key in the predicate before failing
+        throw "predicate " + JSON.stringify(predicate) + " was not found";
+    }
+}
+
 function resolveAndClone (state, parts) {
     var original = this;
 
     for (var i = 0; i < parts.length - 1; i += 1) {
+        if (typeof(parts[i]) == "object") {
+            parts[i] = findIndexByPredicate(state, parts[i]);
+        }
+
         switch (typeof(state[parts[i]])) {
             case "undefined":
                 state[parts[i]] = {};
@@ -52,6 +69,10 @@ function modify (state, path, fn) {
     var parts = Array.prototype.isPrototypeOf(path) ? path : path.split(".");
     var tip = parts.length > 1 ? resolveAndClone.call(this, state, parts) : state;
     var lastKey = parts[parts.length - 1];
+
+    if (typeof(lastKey) === "object") {
+        lastKey = findIndexByPredicate(tip, lastKey);
+    }
 
     fn.call(this, tip, lastKey);
 
