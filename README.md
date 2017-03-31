@@ -38,7 +38,7 @@ Re-mutable supports most common operations on your state:
      .set(["a"], 1)
      .unset(["x"])
      .unset(["myarray", 1]).end();
-   
+
    //console.log(next); => { a: 1, myarray: [0, 2] };
    ```
   2. sort/prepend/concat/splice/push: Can be performend on any item in the store which is an array
@@ -62,6 +62,16 @@ Re-mutable supports most common operations on your state:
      .increment(["counts", "i"])     //default increment/decrement is 1
      .decrement(["counts", "j"], 10) //or specify the amount to increment/decrement by, here 10
      .end();
-   
+
    //console.log(next) => { counts: { i: 6, j: 90 } }
    ```
+
+   4. toggle: Can flip between true and false at the specified path
+   var update = require("re-mutable");
+   var state = { counts: { i: 5, j: false } };
+   var next = update(state)
+     .toggle(["counts", "i"])
+     .toggle(["counts", "j"])
+     .end();
+
+   //console.log(next) => { counts: { i: false, j: true } }

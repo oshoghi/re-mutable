@@ -271,6 +271,12 @@ function push (state, path, item) {
     });
 }
 
+function toggle (state, path) {
+    return modify.call(this, state, path, function (tip, lastKey) {
+        tip[lastKey] = !tip[lastKey];
+    });
+}
+
 function chain (original, state) {
     return {
         original: original,
@@ -301,6 +307,9 @@ function chain (original, state) {
         sort: function (path, fn) {
             return sort.call(original, state, path, fn);
         },
+        toggle: function (path, fn) {
+            return toggle.call(original, state, path);
+        },
         end: function () {
             return state;
         }
@@ -322,6 +331,7 @@ start.concat = concat.bind(noContext);
 start.splice = splice.bind(noContext);
 start.sort = sort.bind(noContext);
 start.push = push.bind(noContext);
+start.toggle = toggle.bind(noContext);
 start.setClone = function (c) { clone = c; }
 
 module.exports = start;

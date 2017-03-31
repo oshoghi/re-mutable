@@ -44,6 +44,14 @@ describe("Re-mutable chained tests", function () {
         expect(i).toEqual(1);
     });
 
+    it("doesnt mutate when toggling", function () {
+        var state = { a: [1, 2, 3] };
+        var next = update(state).toggle(["a", 0]).end();
+
+        expect(next).toEqual({ a: [false, 2, 3] });
+        expect(state).toEqual({ a: [1, 2, 3] });
+    });
+
     it("doesnt mutate when pushing", function () {
         var state = { a: [1, 2, 3] };
         var next = update(state).push(["a"], 4).end();

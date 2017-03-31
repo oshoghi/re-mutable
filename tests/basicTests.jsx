@@ -138,6 +138,16 @@ describe("Re-mutable", function () {
         });
     });
 
+    it("toggles value", function () {
+        var next = update.set(data, ["bool"], false);
+
+        next = update.toggle(next, ["bool"]);
+        expect(next.bool).toEqual(true);
+
+        next = update.toggle(next, ["bool"]);
+        expect(next.bool).toEqual(false);
+    });
+
     it("throws exception when trying to set a predicated that doesnt match", function () {
         var caught = false;
 
