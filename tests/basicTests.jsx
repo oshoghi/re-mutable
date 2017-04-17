@@ -4,14 +4,17 @@ jest.dontMock("../index.js");
 
 describe("Re-mutable", function () {
     var update = require("../index.js");
-    var data = {
-        list: [
-            { id: 1, name: "henry" },
-            { id: 2, name: "omar" },
-            { id: 3, name: "lisa" },
-        ]
-    };
+    var data;
 
+    beforeEach(function () {
+        data = {
+            list: [
+                { id: 1, name: "henry" },
+                { id: 2, name: "omar" },
+                { id: 3, name: "lisa" },
+            ]
+        };
+    });
 
     it("doesnt mutate when pushing", function () {
         var state = { a: [1, 2, 3] };
@@ -127,6 +130,28 @@ describe("Re-mutable", function () {
         });
     });
 
+    it("unsets non-existing predicate", function () {
+        var next = update(data).unset(["list", { id: 5 }]).end();
+        expect(next).toEqual(data)
+    });
+
+    it("doesnt create path for unset", function () {
+        var next = update(data).unset(["a", "b"]).end();
+        expect(next).toEqual(data);
+    });
+
+    it("unset deep predicate", function () {
+        var next = update({ a: data }).unset(["a", "list", { id: 2 }]).end();
+        expect(next).toEqual({
+            a: {
+                list: [
+                    { id: 1, name: "henry" },
+                    { id: 3, name: "lisa" },
+                ]
+            }
+        })
+    });
+
     it("unsets with predicate", function () {
         var next = update.unset(data, ["list", { id: 2 }]);
 
@@ -146,17 +171,5 @@ describe("Re-mutable", function () {
 
         next = update.toggle(next, ["bool"]);
         expect(next.bool).toEqual(false);
-    });
-
-    it("throws exception when trying to set a predicated that doesnt match", function () {
-        var caught = false;
-
-        try {
-            var next = update.unset(data, ["list", { id: 5 }]);
-        } catch (e) {
-            caught = true;
-        }
-
-        expect(caught).toBe(true);
     });
 });

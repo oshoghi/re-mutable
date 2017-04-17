@@ -25,12 +25,11 @@ function findIndexByPredicate (arr, predicate) {
             }
         }
 
-        //only try the first key in the predicate before failing
-        throw "predicate " + JSON.stringify(predicate) + " was not found";
+        return -1;
     }
 }
 
-function resolveAndClone (state, parts) {
+function resolveAndClone (state, parts, name) {
     var original = this;
 
     for (var i = 0; i < parts.length - 1; i += 1) {
@@ -40,6 +39,10 @@ function resolveAndClone (state, parts) {
 
         switch (typeof(state[parts[i]])) {
             case "undefined":
+                if (name === "unset") {
+                    return original;
+                }
+
                 state[parts[i]] = {};
                 break;
             case "object":
@@ -61,20 +64,22 @@ function resolveAndClone (state, parts) {
     return state;
 }
 
-function modify (state, path, fn) {
+function modify (state, path, fn, name) {
     if (this === noContext) {
         state = clone(state);
     }
 
     var parts = Array.prototype.isPrototypeOf(path) ? path : path.split(".");
-    var tip = parts.length > 1 ? resolveAndClone.call(this, state, parts) : state;
+    var tip = parts.length > 1 ? resolveAndClone.call(this, state, parts, name) : state;
     var lastKey = parts[parts.length - 1];
 
     if (typeof(lastKey) === "object") {
         lastKey = findIndexByPredicate(tip, lastKey);
     }
 
-    fn.call(this, tip, lastKey);
+    if (lastKey !== -1) {
+        fn.call(this, tip, lastKey);
+    }
 
     return this !== noContext ? chain(this, state) : state;
 }
@@ -109,7 +114,7 @@ function unset (state, path) {
         } else {
             delete tip[lastKey];
         }
-    });
+    }, "unset");
 };
 
 /**
