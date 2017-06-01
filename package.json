@@ -2,7 +2,7 @@
   "name": "re-mutable",
   "version": "1.2.5",
   "description": "A immutability library which requires minimum overhead per call",
-  "main": "injex.js",
+  "main": "index.js",
   "scripts": {
     "test": "jest"
   },
