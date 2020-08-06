@@ -1,7 +1,12 @@
 var noContext = {};
-var clone = function (obj) {
+
+function isArray (obj) {
+    return Array.prototype.isPrototypeOf(obj);
+}
+
+function clone (obj) {
     if (typeof(obj) === "object") {
-        if (Array.prototype.isPrototypeOf(obj)) {
+        if (isArray(obj)) {
             return obj.slice();
         } else {
             var newObj = {};
@@ -69,7 +74,7 @@ function modify (state, path, fn, name) {
         state = clone(state);
     }
 
-    var parts = Array.prototype.isPrototypeOf(path) ? path : path.split(".");
+    var parts = isArray(path) ? path : path.split(".");
     var tip = parts.length > 1 ? resolveAndClone.call(this, state, parts, name) : state;
     var lastKey = parts[parts.length - 1];
 
@@ -109,7 +114,7 @@ function modify (state, path, fn, name) {
  */
 function unset (state, path) {
     return modify.call(this, state, path, function (tip, lastKey) {
-        if (Array.prototype.isPrototypeOf(tip)) {
+        if (isArray(tip)) {
             tip.splice(lastKey, 1);
         } else {
             delete tip[lastKey];
@@ -282,6 +287,39 @@ function toggle (state, path) {
     });
 }
 
+
+function merge (state, path, obj) {
+    return modify.call(this, state, path, function (tip, lastKey) {
+        switch(typeof(tip[lastKey])) {
+            case "object":
+                var newObj;
+
+                if (isArray(tip[lastKey])) {
+                    if (!isArray(obj)) {
+                        throw new Error("Re-mutable: cannot merge array and non-array");
+                    }
+                    newObj = tip[lastKey].concat(obj);
+                } else {
+                    if (typeof(obj) !== "object" || isArray(obj)) {
+                        throw new Error("Re-mutable: cannot merge hashmap with an array or scalar");
+                    }
+
+                    newObj = clone(tip[lastKey]);
+
+                    for (var k in obj) {
+                        newObj[k] = obj[k];
+                    }
+                }
+
+                tip[lastKey] = newObj;
+                break;
+            default:
+                tip[lastKey] = obj;
+                break;
+        }
+    });
+}
+
 function chain (original, state) {
     return {
         original: original,
@@ -299,6 +337,9 @@ function chain (original, state) {
         },
         concat: function (path, items) {
             return concat.call(original, state, path, items);
+        },
+        merge: function (path, obj) {
+            return merge.call(original, state, path, obj);
         },
         prepend: function (path, items) {
             return prepend.call(original, state, path, items);
@@ -333,6 +374,7 @@ start.increment = increment.bind(noContext);
 start.decrement = decrement.bind(noContext);
 start.prepend = prepend.bind(noContext);
 start.concat = concat.bind(noContext);
+start.merge = merge.bind(noContext);
 start.splice = splice.bind(noContext);
 start.sort = sort.bind(noContext);
 start.push = push.bind(noContext);
